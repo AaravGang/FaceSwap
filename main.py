@@ -1,4 +1,3 @@
-from bson import json_util
 from flask import Flask, request
 from utils import url_to_img
 import cv2

@@ -16,11 +16,11 @@ img_storage = db["image-storage"]
 
 
 def upload_img(img):
-  img = cv2.resize(img,(500,500))
-  ret, buf = cv2.imencode('.png', img)
-  image = base64.b64encode(buf).decode('ascii')
-  print(type(image))
-  data = {'buffer': image}
-  image_id = img_storage.insert_one(data).inserted_id
-  print("uploaded")
-  return image_id
+    img = cv2.resize(img, (500, 500))
+    ret, buf = cv2.imencode(".png", img)
+    image = base64.b64encode(buf).decode("ascii")
+    print(type(image))
+    data = {"buffer": image}
+    image_id = img_storage.insert_one(data).inserted_id
+    print("uploaded")
+    return image_id

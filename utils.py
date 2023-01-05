@@ -5,5 +5,5 @@ from PIL import Image
 
 
 def url_to_img(url):
-  img = Image.open(BytesIO(requests.get(url).content))
-  return np.array(img)
+    img = Image.open(BytesIO(requests.get(url).content))
+    return np.array(img)

@@ -16,11 +16,19 @@ img_storage = db["image-storage"]
 
 
 def upload_img(img):
-    img = cv2.resize(img, (500, 500))
+    # img = cv2.resize(img,(500,500))
     ret, buf = cv2.imencode(".png", img)
     image = base64.b64encode(buf).decode("ascii")
-    print(type(image))
     data = {"buffer": image}
     image_id = img_storage.insert_one(data).inserted_id
-    print("uploaded")
+    print("uploaded image")
     return image_id
+
+
+def upload_video(path):
+    with open("result.mp4", "rb") as videoFile:
+        buf = base64.b64encode(videoFile.read()).decode("ascii")
+        data = {"buffer": buf}
+        vid_id = img_storage.insert_one(data).inserted_id
+        print("uploaded video")
+        return vid_id

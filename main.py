@@ -1,21 +1,21 @@
+from bson import json_util
 from flask import Flask, request
-from utils import url_to_img
+from utils import url_to_img, url_to_video
 import cv2
 import matplotlib.pyplot as plt
-import mediapipe
+import mediapipe  # mediapipe doesnt work on old af mac
 import itertools
 import numpy as np
 from constants import *
-from connect import upload_img
-
+from connect import upload_img, upload_video
 
 # load images
 # src_orig = cv2.imread("./src.png")
-# dst_orig = cv2.imread("./person.jpg")
+# dst_orig = cv2.imread("./dst.png")
 
 # load face mesh module
 faceModule = mediapipe.solutions.face_mesh
-face_mesh = faceModule.FaceMesh(static_image_mode=True, max_num_faces=5)
+face_mesh = faceModule.FaceMesh(static_image_mode=True, max_num_faces=2)
 
 
 # get landmarks
@@ -138,13 +138,13 @@ def face_swap(src, dst, src_landmarks, dst_landmarks):
     return result
 
 
-def main(src, dst, show=False):
+def main(src, dst, show=False, upload=True):
 
     # dst_ = dst.copy()
 
-    src_multi_landmarks = get_landmarks(src)
+    src_multi_landmarks = get_landmarks(cv2.cvtColor(src, cv2.COLOR_BGR2RGB))
 
-    dst_multi_landmarks = get_landmarks(dst)
+    dst_multi_landmarks = get_landmarks(cv2.cvtColor(dst, cv2.COLOR_BGR2RGB))
 
     if all([src_multi_landmarks, dst_multi_landmarks]):
 
@@ -164,9 +164,45 @@ def main(src, dst, show=False):
     if show:
         plt.imshow(cv2.cvtColor(dst, cv2.COLOR_BGR2RGB))
 
-    upload_id = upload_img(dst)
+    if upload:
+        upload_id = upload_img(dst)
+        return upload_id
 
-    return upload_id
+    return dst
+
+
+def handle_video(src, cap):
+    res_path = "result.mp4"
+
+    count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    face_count = 0
+
+    result = cv2.VideoWriter(
+        res_path,
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        int(cap.get(cv2.CAP_PROP_FPS)),
+        (width, height),
+    )
+
+    while True:
+        ret, frame = cap.read()
+        if ret:
+            res = main(src, frame, upload=False)
+            result.write(frame if type(res) == bool and res == False else res)
+            if type(res) != bool:
+                face_count += 1
+
+        else:
+            break
+    cap.release()
+    result.release()
+
+    if face_count == 0:
+        return False
+    return upload_video(res_path)
 
 
 app = Flask(__name__)
@@ -184,17 +220,31 @@ def home():
 
 @app.route("/api", methods=["GET", "POST"])
 def api():
-    dst_url = request.args.get("dstUrl")
     src_url = request.args.get("srcUrl")
+    dst_url = request.args.get("dstUrl")
 
     # print(src_url, dst_url)
 
     dst = cv2.cvtColor(url_to_img(dst_url), cv2.COLOR_RGBA2BGR)
     src = cv2.cvtColor(url_to_img(src_url), cv2.COLOR_RGBA2BGR)
 
-    res = main(src, dst)
-    print(res)
-    return {"status": bool(res), "id": str(res)}
+    id = main(src, dst)
+    print(id)
+    return {"status": bool(id), "id": str(id)}
+
+
+@app.route("/video", methods=["GET", "POST"])
+def video_api():
+    src_url = request.args.get("srcUrl")
+    dst_url = request.args.get("dstUrl")
+
+    print(src_url, dst_url)
+
+    src = cv2.cvtColor(url_to_img(src_url), cv2.COLOR_RGBA2BGR)
+    cap = url_to_video(dst_url)
+    id = handle_video(src, cap)
+
+    return {"status": bool(id), "id": str(id)}
 
 
 if __name__ == "__main__":

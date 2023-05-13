@@ -1,22 +1,36 @@
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import numpy as np
 from io import BytesIO
 from PIL import Image
-import tempfile
 import cv2
 
 
 def url_to_img(url):
-    img = Image.open(BytesIO(requests.get(url).content))
+    try:
+        img = requests.get(url)
+        img = BytesIO(img.content)
+        img = Image.open(img)
+    except Exception as e:
+        print("Exception in url to image", e)
+        return False
     return np.array(img)
 
 
 def url_to_video(url):
-    data = requests.get(url).content
+    try:
+        session = requests.Session()
+        retry = Retry(connect=3, backoff_factor=1)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('https://', adapter)
+        data = session.get(url).content
 
-    with tempfile.NamedTemporaryFile() as temp:
-        temp.write(data)
-        cap = cv2.VideoCapture(temp.name)
-        temp.close()
-    return cap
-
+        with open("input.mp4", "wb") as f:
+            f.write(data)
+            cap = cv2.VideoCapture(f.name)
+            f.close()
+        return cap
+    except Exception as e:
+        print("Exception in url to video", e)
+        return False

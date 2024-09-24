@@ -8,7 +8,7 @@ import itertools
 import numpy as np
 from constants import *
 from connect import upload_img, upload_video
-from tqdm import tqdm
+# from tqdm import tqdm
 from moviepy.editor import VideoFileClip
 import os
 from proglog import ProgressBarLogger

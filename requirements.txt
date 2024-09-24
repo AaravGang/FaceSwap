@@ -1,2 +1,9 @@
 Flask>=2.0.2
 gunicorn>=20.0.4
+requests>=2.24.0
+urllib3>=1.25.10
+opencv-python>=4.5.5.64
+Pillow>=9.5.0
+numpy>=1.24.4
+moviepy>=1.0.3
+proglog>=0.1.10

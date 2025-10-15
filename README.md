@@ -1,1 +1,1 @@
-A api to swap faces! Built for my discord bot😶‍🌫️
+An api to swap faces! Built for my discord bot😶‍🌫️

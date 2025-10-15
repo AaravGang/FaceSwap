@@ -1,1 +1,1 @@
-ONLY HOT FACES FOR DISCORD BOT GENDER REVEAL COMMAND
+A api to swap faces! Built for my discord bot😶‍🌫️

@@ -1,0 +1,15 @@
+.git/
+.venv/
+pycache/
+.pytest_cache/
+.mypy_cache/
+node_modules/
+*.log
+*.sqlite3
+*.pyc
+.DS_Store
+.env
+build/
+dist/
+*.tar.gz
+*.zip

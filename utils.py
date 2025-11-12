@@ -4,7 +4,7 @@ from urllib3.util.retry import Retry
 import numpy as np
 from io import BytesIO
 from PIL import Image
-import tempfile
+# import tempfile
 import cv2
 
 
